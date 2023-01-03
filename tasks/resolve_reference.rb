@@ -4,13 +4,11 @@
 require 'json'
 require 'shellwords'
 
-rth_install_path = '../../ruby_task_helper/files/task_helper.rb'
-rth_fixture_path = '../spec/fixtures/modules/ruby_task_helper/files/task_helper.rb'
-
-if File.exist?(rth_install_path)
-  require_relative rth_install_path
-else
-  require_relative rth_fixture_path
+# Ugly workaround to make the require_relative working in unit tests too
+begin
+  require_relative '../../ruby_task_helper/files/task_helper.rb'
+rescue LoadError
+  require_relative '../spec/fixtures/modules/ruby_task_helper/files/task_helper.rb'
 end
 
 # Inventory of `lima` VMs
