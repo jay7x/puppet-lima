@@ -1,0 +1,23 @@
+{
+  "description": "Generate Bolt targets from Lima VMs",
+  "files": [
+    "ruby_task_helper/files/task_helper.rb",
+    "ruby_plugin_helper/lib/plugin_helper.rb"
+  ],
+  "input_method": "stdin",
+  "parameters": {
+    "limactl_path": {
+      "description": "Location of the `limactl` binary if not in PATH",
+      "type": "Optional[String[1]]"
+    },
+    "only_matching_names": {
+      "description": "Only VM with names matching this regex will be included into the inventory.",
+      "type": "Optional[Pattern]"
+    },
+    "except_matching_names": {
+      "description": "VMs with names matching this regex will be excluded from the inventory.",
+      "type": "Optional[Pattern]"
+    }
+  },
+  "puppet_task_version": 1
+}
