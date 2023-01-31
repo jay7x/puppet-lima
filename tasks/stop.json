@@ -1,0 +1,19 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Stop Lima VM",
+  "input_method": "stdin",
+  "files": [
+    "ruby_task_helper/files/task_helper.rb"
+  ],
+  "parameters": {
+    "limactl_path": {
+      "description": "Location of the `limactl` binary if not in PATH",
+      "type": "Optional[String[1]]"
+    },
+    "name": {
+      "description": "VM name",
+      "type": "String[1]"
+    }
+  }
+}
