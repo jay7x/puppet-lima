@@ -3,8 +3,8 @@
 require 'spec_helper'
 require_relative '../../tasks/resolve_reference.rb'
 
-describe 'LimaInventory' do
-  let(:task) { LimaInventory.new }
+describe ResolveReference do
+  let(:task) { described_class.new }
   let(:vms) do
     [
       { 'name' => 'debian_1', 'status' => 'Running' },

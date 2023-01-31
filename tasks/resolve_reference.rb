@@ -12,7 +12,14 @@ rescue LoadError
 end
 
 # Inventory of `lima` VMs
-class LimaInventory < TaskHelper
+class ResolveReference < TaskHelper
+  def initialize
+    super
+
+    @ssh_options = {}
+    @vm_list = nil
+  end
+
   def task(opts = {})
     targets = resolve_reference(opts)
     { value: targets }
@@ -67,12 +74,16 @@ class LimaInventory < TaskHelper
 
   # Get the VMs list
   def get_vms
+    return @vm_list if @vm_list
+
     vms = `#{@limactl} list --json`.split("\n")
-    vms.map { |vm| JSON.parse(vm) }
+    @vm_list = vms.map { |vm| JSON.parse(vm) }
   end
 
   # Get the VM's ssh config
   def get_vm_ssh_options(vm)
+    return @ssh_options[vm] if @ssh_options.key? vm
+
     lima_output = `#{@limactl} show-ssh -f options #{vm}`
     vm_opts_pairs = Shellwords.shellwords(lima_output).map { |x| x.split('=', 2) }.flatten
     vm_opts = Hash[*vm_opts_pairs]
@@ -85,8 +96,8 @@ class LimaInventory < TaskHelper
     lima_home = JSON.parse(`#{@limactl} info`)['limaHome']
     vm_opts['IdentityFile'] = "#{lima_home}/_config/user"
 
-    vm_opts
+    @ssh_options[vm] = vm_opts
   end
 end
 
-LimaInventory.run if $PROGRAM_NAME == __FILE__
+ResolveReference.run if $PROGRAM_NAME == __FILE__
