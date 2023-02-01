@@ -10,8 +10,6 @@ Table of Contents
 
 The Lima module is a "glue" between Puppet Bolt and [`lima`](https://github.com/lima-vm/lima)
 
-Currently just the Bolt inventory plugin is implemented.
-
 ## Requirements
 
 You will need to have installed `limactl` on the system you wish to run Bolt from.
@@ -38,10 +36,7 @@ groups:
         except_matching_names: '^default'
 ```
 
-## Tasks
+## Reference
 
-At the moment there are no other tasks implemented except the inventory plugin (`resolve_reference`). Tasks to be implemented:
-
-- `lima::start`: Creates and runs a VM
-- `lima::stop`: Stops a VM
-- `lima::delete`: Deletes a VM
+Reference documentation for the module is generated using
+[puppet-strings](https://puppet.com/docs/puppet/latest/puppet_strings.html) and available in [REFERENCE.md](REFERENCE.md)
