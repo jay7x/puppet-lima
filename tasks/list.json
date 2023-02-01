@@ -1,0 +1,19 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Return list of Lima VMs",
+  "input_method": "stdin",
+  "files": [
+    "ruby_task_helper/files/task_helper.rb"
+  ],
+  "parameters": {
+    "limactl_path": {
+      "description": "Location of the `limactl` binary if not in PATH",
+      "type": "Optional[String[1]]"
+    },
+    "names": {
+      "description": "VM names to list",
+      "type": "Optional[Array[String[1]]]"
+    }
+  }
+}

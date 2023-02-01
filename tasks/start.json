@@ -1,0 +1,35 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Create or start Lima VM",
+  "input_method": "stdin",
+  "files": [
+    "ruby_task_helper/files/task_helper.rb"
+  ],
+  "parameters": {
+    "limactl_path": {
+      "description": "Location of the `limactl` binary if not in PATH",
+      "type": "Optional[String[1]]"
+    },
+    "name": {
+      "description": "VM name",
+      "type": "String[1]"
+    },
+    "timeout": {
+      "description": "Duration to wait for the instance to be running before timing out",
+      "type": "Optional[String[1]]"
+    },
+    "url": {
+      "description": "Remote URL containing YAML configuration to create the instance from",
+      "type": "Optional[String[1]]"
+    },
+    "template": {
+      "description": "Lima template to create the instance from",
+      "type": "Optional[String[1]]"
+    },
+    "config": {
+      "description": "Configuration hash to create the instance from",
+      "type": "Optional[Hash]"
+    }
+  }
+}
