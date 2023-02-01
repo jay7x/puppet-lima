@@ -6,9 +6,53 @@
 
 ### Tasks
 
+* [`delete`](#delete): Delete Lima VM
+* [`list`](#list): Return list of Lima VMs
 * [`resolve_reference`](#resolve_reference): Generate Bolt targets from Lima VMs
+* [`start`](#start): Create or start Lima VM
+* [`stop`](#stop): Stop Lima VM
 
 ## Tasks
+
+### <a name="delete"></a>`delete`
+
+Delete Lima VM
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `limactl_path`
+
+Data type: `Optional[String[1]]`
+
+Location of the `limactl` binary if not in PATH
+
+##### `name`
+
+Data type: `String[1]`
+
+VM name
+
+### <a name="list"></a>`list`
+
+Return list of Lima VMs
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `limactl_path`
+
+Data type: `Optional[String[1]]`
+
+Location of the `limactl` binary if not in PATH
+
+##### `names`
+
+Data type: `Optional[Array[String[1]]]`
+
+VM names to list
 
 ### <a name="resolve_reference"></a>`resolve_reference`
 
@@ -35,4 +79,68 @@ Only VM with names matching this regex will be included into the inventory.
 Data type: `Optional[Pattern]`
 
 VMs with names matching this regex will be excluded from the inventory.
+
+### <a name="start"></a>`start`
+
+Create or start Lima VM
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `limactl_path`
+
+Data type: `Optional[String[1]]`
+
+Location of the `limactl` binary if not in PATH
+
+##### `name`
+
+Data type: `String[1]`
+
+VM name
+
+##### `timeout`
+
+Data type: `Optional[String[1]]`
+
+Duration to wait for the instance to be running before timing out
+
+##### `url`
+
+Data type: `Optional[String[1]]`
+
+Remote URL containing YAML configuration to create the instance from
+
+##### `template`
+
+Data type: `Optional[String[1]]`
+
+Lima template to create the instance from
+
+##### `config`
+
+Data type: `Optional[Hash]`
+
+Configuration hash to create the instance from
+
+### <a name="stop"></a>`stop`
+
+Stop Lima VM
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `limactl_path`
+
+Data type: `Optional[String[1]]`
+
+Location of the `limactl` binary if not in PATH
+
+##### `name`
+
+Data type: `String[1]`
+
+VM name
 
