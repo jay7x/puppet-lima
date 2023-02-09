@@ -1,6 +1,6 @@
 {
   "name": "jay7x-lima",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "author": "Yury Bushmelev",
   "summary": "Puppet Bolt tasks to manage VMs in a lima-vm environment",
   "license": "Apache-2.0",

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v1.0.0](https://github.com/jay7x/puppet-lima/tree/v1.0.0) (2023-02-09)
+
+[Full Changelog](https://github.com/jay7x/puppet-lima/compare/v0.0.2...v1.0.0)
+
+### Added
+
+- Add cluster management support [\#5](https://github.com/jay7x/puppet-lima/pull/5) ([jay7x](https://github.com/jay7x))
+
 ## [v0.0.2](https://github.com/jay7x/puppet-lima/tree/v0.0.2) (2023-02-01)
 
 [Full Changelog](https://github.com/jay7x/puppet-lima/compare/v0.0.1...v0.0.2)
