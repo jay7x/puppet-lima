@@ -12,6 +12,13 @@
 * [`start`](#start): Create or start Lima VM
 * [`stop`](#stop): Stop Lima VM
 
+### Plans
+
+* [`lima::cluster::delete`](#lima--cluster--delete): Delete the cluster of Lima VMs
+* [`lima::cluster::start`](#lima--cluster--start): Create/start the cluster of Lima VMs
+* [`lima::cluster::stop`](#lima--cluster--stop): Stop the cluster of Lima VMs
+* [`lima::clusters`](#lima--clusters): Return the cluster definition
+
 ## Tasks
 
 ### <a name="delete"></a>`delete`
@@ -143,4 +150,133 @@ Location of the `limactl` binary if not in PATH
 Data type: `String[1]`
 
 VM name
+
+## Plans
+
+### <a name="lima--cluster--delete"></a>`lima::cluster::delete`
+
+Delete the cluster of Lima VMs
+
+#### Parameters
+
+The following parameters are available in the `lima::cluster::delete` plan:
+
+* [`name`](#-lima--cluster--delete--name)
+* [`clusters`](#-lima--cluster--delete--clusters)
+* [`target`](#-lima--cluster--delete--target)
+
+##### <a name="-lima--cluster--delete--name"></a>`name`
+
+Data type: `String[1]`
+
+Cluster name
+
+##### <a name="-lima--cluster--delete--clusters"></a>`clusters`
+
+Data type: `Optional[Hash]`
+
+Hash of all defined clusters. Populated from Hiera usually.
+
+Default value: `undef`
+
+##### <a name="-lima--cluster--delete--target"></a>`target`
+
+Data type: `TargetSpec`
+
+The host to run the limactl on
+
+Default value: `'localhost'`
+
+### <a name="lima--cluster--start"></a>`lima::cluster::start`
+
+Create/start the cluster of Lima VMs
+
+#### Parameters
+
+The following parameters are available in the `lima::cluster::start` plan:
+
+* [`name`](#-lima--cluster--start--name)
+* [`clusters`](#-lima--cluster--start--clusters)
+* [`target`](#-lima--cluster--start--target)
+
+##### <a name="-lima--cluster--start--name"></a>`name`
+
+Data type: `String[1]`
+
+Cluster name
+
+##### <a name="-lima--cluster--start--clusters"></a>`clusters`
+
+Data type: `Optional[Hash]`
+
+Hash of all defined clusters. Populated from Hiera usually.
+
+Default value: `undef`
+
+##### <a name="-lima--cluster--start--target"></a>`target`
+
+Data type: `TargetSpec`
+
+The host to run the limactl on
+
+Default value: `'localhost'`
+
+### <a name="lima--cluster--stop"></a>`lima::cluster::stop`
+
+Stop the cluster of Lima VMs
+
+#### Parameters
+
+The following parameters are available in the `lima::cluster::stop` plan:
+
+* [`name`](#-lima--cluster--stop--name)
+* [`clusters`](#-lima--cluster--stop--clusters)
+* [`target`](#-lima--cluster--stop--target)
+
+##### <a name="-lima--cluster--stop--name"></a>`name`
+
+Data type: `String[1]`
+
+Cluster name
+
+##### <a name="-lima--cluster--stop--clusters"></a>`clusters`
+
+Data type: `Optional[Hash]`
+
+Hash of all defined clusters. Populated from Hiera usually.
+
+Default value: `undef`
+
+##### <a name="-lima--cluster--stop--target"></a>`target`
+
+Data type: `TargetSpec`
+
+The host to run the limactl on
+
+Default value: `'localhost'`
+
+### <a name="lima--clusters"></a>`lima::clusters`
+
+Return the cluster definition
+
+#### Parameters
+
+The following parameters are available in the `lima::clusters` plan:
+
+* [`name`](#-lima--clusters--name)
+* [`clusters`](#-lima--clusters--clusters)
+
+##### <a name="-lima--clusters--name"></a>`name`
+
+Data type: `String[1]`
+
+Cluster name
+
+##### <a name="-lima--clusters--clusters"></a>`clusters`
+
+Data type: `Hash`
+
+Hash of all defined clusters. Populated from Hiera usually.
+
+Default value: `lookup('lima::clusters', 'default_value' => {})`
 

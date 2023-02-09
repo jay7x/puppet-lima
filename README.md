@@ -4,7 +4,8 @@ Table of Contents
 
 1. [Description](#description)
 2. [Requirements](#requirements)
-3. [Usage](#usage)
+3. [Inventory plugin usage](#inventory-plugin-usage)
+4. [Cluster management plans usage](#cluster-management-plans-usage)
 
 ## Description
 
@@ -34,6 +35,53 @@ groups:
     targets:
       - _plugin: lima
         except_matching_names: '^default'
+```
+
+## Cluster management plans usage
+
+This module provides a way to define and manage clusters of Lima VMs. It's expected to define clusters in the [plan_hierarchy of your Bolt project's Hiera](https://www.puppet.com/docs/bolt/latest/hiera.html#outside-apply-blocks).
+
+Below is the example of a Hiera file under `plan_hierarchy`:
+
+```yaml
+---
+# Leverage YAML features to define templates required
+x-ubuntu2004: &ubuntu2004
+  images:
+  - location: "https://cloud-images.ubuntu.com/releases/20.04/release-20230117/ubuntu-20.04-server-cloudimg-amd64.img"
+    arch: "x86_64"
+    digest: "sha256:3e44e9f886eba6b91662086d24028894bbe320c1de89be5c091019fedf9c5ce6"
+  - location: "https://cloud-images.ubuntu.com/releases/20.04/release-20230117/ubuntu-20.04-server-cloudimg-arm64.img"
+    arch: "aarch64"
+    digest: "sha256:4ea4700f7b1de194a2f6bf760b911ea3071e0309fcea14d3a465a3323d57c60e"
+  - location: "https://cloud-images.ubuntu.com/releases/20.04/release/ubuntu-20.04-server-cloudimg-amd64.img"
+    arch: "x86_64"
+  - location: "https://cloud-images.ubuntu.com/releases/20.04/release/ubuntu-20.04-server-cloudimg-arm64.img"
+    arch: "aarch64"
+  mounts:
+  - location: "~"
+
+# Cluster definitions
+lima::clusters:
+  example: # `example` cluster
+    nodes:
+      - example1
+        template: ubuntu  # Use latest ubuntu version on this VM
+      - example2
+      - example3
+    config:
+      <<: *ubuntu2004
+```
+
+Now when you have some clusters defined you can use cluster management plans to start/stop/delete a cluster. E.g.:
+
+```bash
+# Start the cluster (create example[123] VMs)
+bolt plan run lima::cluster::start name=example
+# Stop the cluster (stop example[123] VMs)
+bolt plan run lima::cluster::stop name=example
+# Delete the cluster (delete example[123] VMs)
+bolt plan run lima::cluster::delete name=example
 ```
 
 ## Reference

@@ -19,3 +19,8 @@ hierarchy:
       - "os/%{facts.os.family}.yaml"
   - name: 'common'
     path: 'common.yaml'
+
+# Define plan lookup hierarchy
+# This prevents "Interpolations are not supported in lookups outside of an apply
+# block" error when plan with lookup is executed
+plan_hierarchy: []
