@@ -130,8 +130,9 @@ describe LimaStart do
       end
 
       context 'with config specified' do
-        config = { 'a': 'b' }
-        tmpfile = Tempfile.new(["lima_#{vm_name}", '.json'])
+        let(:opts) { super().merge(config: { 'a': 'b' }) }
+
+        tmpfile = Tempfile.new(["lima_#{vm_name}", '.yaml'])
         before :each do
           allow(Tempfile).to receive(:new).and_return(tmpfile)
         end
@@ -140,7 +141,14 @@ describe LimaStart do
           tmpfile.unlink
         end
 
-        it_behaves_like 'limactl start', { name: vm_name, config: config }, tmpfile.path
+        it 'invokes `limactl start` with correct parameters' do
+          allow(Open3).to receive(:capture3).with('limactl', 'validate', tmpfile.path).and_return(['stdout', 'stderr', 0])
+          allow(Open3).to receive(:capture3).with('limactl', 'start', "--name=#{opts[:name]}", "--timeout=#{opts[:timeout]}", tmpfile.path).and_return(lima_response)
+
+          task.set_opts(opts)
+          result = task.create
+          expect(result).to eq(success_result)
+        end
       end
     end
 

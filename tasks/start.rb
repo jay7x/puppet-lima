@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'json'
+require 'yaml'
 require 'open3'
 require 'tempfile'
 require 'shellwords'
@@ -40,11 +40,18 @@ class LimaStart < TaskHelper
     elsif @url
       cfg_url = @url
     elsif @config
-      # Write @config to a temporary JSON file and pass it to limactl later
+      # Write @config to a temporary YAML file and pass it to limactl later
       safe_name = Shellwords.escape(@name)
-      tmpfile = Tempfile.new(["lima_#{safe_name}", '.json'])
-      tmpfile.write(JSON.dump(@config))
+      tmpfile = Tempfile.new(["lima_#{safe_name}", '.yaml'])
+      # @config has symbolized keys by default. So .to_yaml will write keys as :symbols.
+      # Keys should be stringified to avoid this so Lima can parse the YAML properly.
+      tmpfile.write(stringify_keys_recursively(@config).to_yaml)
       tmpfile.close
+
+      # Validate the config
+      _, stderr_str, status = Open3.capture3(@limactl, 'validate', tmpfile.path)
+      raise TaskHelper::Error.new(stderr_str, 'lima/validate-error', @config.to_yaml) unless status == 0
+
       cfg_url = tmpfile.path
     else
       raise TaskHelper::Error.new('One of url/template/config parameters must be specified', 'lima/create-error')
@@ -80,6 +87,23 @@ class LimaStart < TaskHelper
     @url = opts[:url]
     @template = opts[:template]
     @config = opts[:config]
+  end
+
+  private
+
+  # Stringify Hash keys recursively
+  def stringify_keys_recursively(hash)
+    stringified_hash = {}
+    hash.each do |k, v|
+      stringified_hash[k.to_s] = if v.is_a?(Hash)
+                                   stringify_keys_recursively(v)
+                                 elsif v.is_a?(Array)
+                                   v.map { |x| x.is_a?(Hash) ? stringify_keys_recursively(x) : x }
+                                 else
+                                   v
+                                 end
+    end
+    stringified_hash
   end
 end
 
