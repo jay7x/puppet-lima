@@ -10,7 +10,7 @@ plan lima::cluster::stop (
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
 ) {
-  $cluster = run_plan('lima::clusters', 'clusters' => $clusters, 'name' => $name)
+  $cluster = run_plan('lima::clusters', 'name' => $name, 'clusters' => $clusters)
 
   $defined_nodes = $cluster['nodes'].map |$node| {
     $node ? {
