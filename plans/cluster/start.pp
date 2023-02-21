@@ -10,10 +10,10 @@ plan lima::cluster::start (
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
 ) {
-  $cluster = run_plan('lima::clusters', 'clusters' => $clusters, 'name' => $name)
+  $cluster = run_plan('lima::clusters', 'name' => $name, 'clusters' => $clusters)
   $tgt = get_target($target)
 
-  $cluster_config = $cluster['nodes'].map |$node| {
+  $cluster_config = $cluster['nodes'].reduce({}) |$memo, $node| {
     $n = $node ? {
       Hash => $node,
       String => { 'name' => $node },
@@ -21,25 +21,26 @@ plan lima::cluster::start (
     }
 
     # Use per-node configs first. Use cluster-wide configs otherwise.
-    # Look for explicit config hash first then template then url.
+    # Look for explicit config hash then template then url.
+    # Keeping it non-DRY for readability
     $cfg = [
-      [$n['config'], 'config'],
-      [$n['template'], 'template'],
-      [$n['url'], 'url'],
-      [$cluster['config'], 'config'],
-      [$cluster['template'], 'template'],
-      [$cluster['url'], 'url'],
-    ].filter |$x| { $x[0] } # Delete undefined options
+      ['config', $n['config']],
+      ['template', $n['template']],
+      ['url', $n['url']],
+      ['config', $cluster['config']],
+      ['template', $cluster['template']],
+      ['url', $cluster['url']],
+    ].filter |$x| { $x[1] } # Delete undefined options
 
-    unless $cfg.count >= 1 {
+    unless $cfg.length >= 1 {
       fail("Node ${n['name']} has no config/template/url defined in the cluster configuration")
     }
 
     # Use first defined option ($cfg[0])
-    ({ 'name' => $n['name'], $cfg[0][1] => $cfg[0][0] })
+    $memo + { $n['name'] => { $cfg[0][0] => $cfg[0][1] } }
   }
 
-  $defined_nodes = $cluster_config.map |$node| { $node['name'] }
+  $defined_nodes = $cluster_config.keys
   out::verbose("Defined nodes: ${defined_nodes}")
 
   # Collect and set the target's facts
@@ -72,11 +73,10 @@ plan lima::cluster::start (
     run_task(
       'lima::start',
       $tgt,
-      "Create VM ${node}",
       'name' => $node,
-      'template' => $cluster['template'],
-      'config' => $cluster['config'],
-      'url' => $cluster['url'],
+      'template' => $cluster_config[$node]['template'],
+      'config' => $cluster_config[$node]['config'],
+      'url' => $cluster_config[$node]['url'],
     )
   }
 
@@ -92,7 +92,6 @@ plan lima::cluster::start (
       run_task(
         'lima::start',
         $tgt,
-        "Start VM ${node}",
         'name' => $node,
       )
     }

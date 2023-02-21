@@ -71,3 +71,7 @@ def ensure_module_defined(module_name)
 end
 
 # 'spec_overrides' from sync.yml will appear below this line
+# https://www.puppet.com/docs/bolt/latest/testing_plans.html
+require 'bolt_spec/plans'
+include BoltSpec::Plans
+BoltSpec::Plans.init
