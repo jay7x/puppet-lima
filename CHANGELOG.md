@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v1.1.1](https://github.com/jay7x/puppet-lima/tree/v1.1.1) (2023-02-21)
+
+[Full Changelog](https://github.com/jay7x/puppet-lima/compare/v1.1.0...v1.1.1)
+
+### Added
+
+- Fix per-node configuration in lima::cluster::start plan [\#7](https://github.com/jay7x/puppet-lima/pull/7) ([jay7x](https://github.com/jay7x))
+
 ## [v1.1.0](https://github.com/jay7x/puppet-lima/tree/v1.1.0) (2023-02-16)
 
 [Full Changelog](https://github.com/jay7x/puppet-lima/compare/v1.0.0...v1.1.0)
