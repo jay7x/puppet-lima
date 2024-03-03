@@ -4,7 +4,8 @@
   "description": "Stop Lima VM",
   "input_method": "stdin",
   "files": [
-    "ruby_task_helper/files/task_helper.rb"
+    "ruby_task_helper/files/task_helper.rb",
+    "lima/lib/cli_helper.rb"
   ],
   "parameters": {
     "limactl_path": {
