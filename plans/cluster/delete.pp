@@ -21,13 +21,5 @@ plan lima::cluster::delete (
   }
   out::verbose("Nodes to delete: ${defined_nodes}")
 
-  $stop_res = parallelize ($defined_nodes) |$node| {
-    run_task(
-      'lima::delete',
-      $target,
-      'name' => $node,
-    )
-  }
-
-  return $stop_res
+  return run_task('lima::delete', $target, 'names' => $defined_nodes)
 }

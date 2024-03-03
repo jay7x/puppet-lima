@@ -1,7 +1,8 @@
 {
   "description": "Generate Bolt targets from Lima VMs",
   "files": [
-    "ruby_task_helper/files/task_helper.rb"
+    "ruby_task_helper/files/task_helper.rb",
+    "lima/lib/cli_helper.rb"
   ],
   "input_method": "stdin",
   "parameters": {
