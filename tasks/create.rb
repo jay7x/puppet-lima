@@ -10,19 +10,23 @@ rescue LoadError
   require_relative '../spec/fixtures/modules/ruby_task_helper/files/task_helper.rb'
 end
 
-# Delete the named Lima VM(s)
-class LimaDeleteTask < TaskHelper
+# Create the named Lima VM
+class LimaCreateTask < TaskHelper
   def task(opts = {})
-    delete(opts)
+    create(opts)
   end
 
-  def delete(opts = {})
+  def create(opts)
     @cli_helper ||= opts.delete(:cli_helper) || Lima::CliHelper.new(opts)
-    @limactl = opts.delete(:limactl_path) || 'limactl'
-    @names = opts.delete(:names) || [ opts.delete(:name) ].compact
-
-    { delete: @cli_helper.delete(@names) }
+    @name = opts.delete(:name)
+    @url = opts.delete(:url)
+    @config = opts.delete(:config)
+    begin
+      { create: @cli_helper.create(@name, { url: @url, config: @config }) }
+    rescue Lima::LimaError => e
+      raise TaskHelper::Error.new(e.message, 'lima/create-error')
+    end
   end
 end
 
-LimaDeleteTask.run if $PROGRAM_NAME == __FILE__
+LimaCreateTask.run if $PROGRAM_NAME == __FILE__

@@ -41,15 +41,14 @@ describe 'lima::cluster::delete' do
   it 'deletes all nodes in the cluster' do
     expect_plan('lima::clusters').always_return(cluster)
 
-    nodes.each do |node|
-      expect_task('lima::delete').be_called_times(1).with_params({ 'name' => node }).always_return({})
-    end
+    expect_task('lima::delete').be_called_times(1).with_params('names' => nodes).always_return(delete: true)
 
     expect_out_verbose.with_params("Nodes to delete: [#{nodes.join(', ')}]")
 
     result = run_plan(plan, { 'name' => cluster_name, 'clusters' => clusters })
 
     expect(result.ok?).to be(true)
-    expect(result.value.count).to eq(nodes.length)
+    expect(result.value.count).to eq(1)
+    expect(result.value[0].value).to eq('delete' => true)
   end
 end
