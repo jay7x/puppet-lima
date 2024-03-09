@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'cli_helper'
+require_relative '../lib/cli_helper.rb'
 
 # Ugly workaround to make the require_relative working in unit tests too
 begin

@@ -9,9 +9,11 @@ module Lima
   class CliHelper
     def initialize(options)
       require 'json'
+      require 'logger'
       require 'open3'
       require 'shellwords'
-      require 'logger'
+      require 'tempfile'
+      require 'yaml'
 
       @logger = options[:logger] || Logger.new($stderr)
       @limactl = options[:limactl_path] || 'limactl'
@@ -104,7 +106,7 @@ module Lima
         raise LimaError, 'Either url or config parameter must be specified'
       end
 
-      lima_cmd = [@limactl, 'create', "--name=#{vm_name}", "--timeout=#{@timeout}s", cfg_url]
+      lima_cmd = [@limactl, 'create', "--name=#{vm_name}", cfg_url]
       _, stderr_str, status = Open3.capture3(*lima_cmd)
       tmpfile&.unlink # Delete tmpfile if any
 
