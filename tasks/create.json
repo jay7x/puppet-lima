@@ -16,10 +16,6 @@
       "description": "VM name",
       "type": "String[1]"
     },
-    "timeout": {
-      "description": "Duration to wait for the instance to be running before timing out",
-      "type": "Optional[String[1]]"
-    },
     "url": {
       "description": "Remote URL/template URL/local file path, containing YAML configuration to create the instance from",
       "type": "Optional[String[1]]"
