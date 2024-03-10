@@ -13,7 +13,7 @@ plan lima::cluster::delete (
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
 ) {
-  $cluster = run_plan('lima::clusters', 'name' => $name, 'clusters' => $clusters)
+  $cluster = run_plan('lima::clusters', name => $name, clusters => $clusters)
 
   $defined_nodes = $cluster['nodes'].map |$node| {
     $node ? {
@@ -25,7 +25,7 @@ plan lima::cluster::delete (
   out::verbose("Nodes to delete: ${defined_nodes}")
 
   return run_task('lima::delete', $target, {
-      'names' => $defined_nodes,
-      'force' => $force,
+      names => $defined_nodes,
+      force => $force,
   })
 }
