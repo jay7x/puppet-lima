@@ -31,7 +31,9 @@ plan lima::cluster::create (
     ].filter |$x| { $x[1] } # Delete undefined options
 
     unless $cfg.length >= 1 {
-      fail("Node ${n['name']} has no config/url defined in the cluster configuration")
+      fail_plan("Node ${n['name']} has no config/url defined in the cluster configuration", 'lima/misconfigured-node', {
+          misconfigured_node => $n['name'],
+      })
     }
 
     # Use first defined option ($cfg[0])
