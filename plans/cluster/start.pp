@@ -10,7 +10,9 @@ plan lima::cluster::start (
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
 ) {
-  $cluster = run_plan('lima::clusters', name => $name, clusters => $clusters)
+  $cluster = without_default_logging() || {
+    run_plan('lima::clusters', name => $name, clusters => $clusters)
+  }
   $tgt = get_target($target)
 
   $defined_nodes = $cluster['nodes'].map |$node| {
