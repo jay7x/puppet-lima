@@ -2,13 +2,7 @@
 # frozen_string_literal: true
 
 require_relative '../lib/cli_helper.rb'
-
-# Ugly workaround to make the require_relative working in unit tests too
-begin
-  require_relative '../../ruby_task_helper/files/task_helper.rb'
-rescue LoadError
-  require_relative '../spec/fixtures/modules/ruby_task_helper/files/task_helper.rb'
-end
+require_relative '../../ruby_task_helper/files/task_helper.rb' unless Object.const_defined?('TaskHelper')
 
 # Stop the named Lima VM
 class LimaStopTask < TaskHelper
