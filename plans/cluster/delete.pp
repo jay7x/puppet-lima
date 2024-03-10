@@ -13,7 +13,9 @@ plan lima::cluster::delete (
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
 ) {
-  $cluster = run_plan('lima::clusters', name => $name, clusters => $clusters)
+  $cluster = without_default_logging() || {
+    run_plan('lima::clusters', name => $name, clusters => $clusters)
+  }
 
   $defined_nodes = $cluster['nodes'].map |$node| {
     $node ? {
