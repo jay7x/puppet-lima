@@ -3,8 +3,7 @@
 require 'spec_helper'
 
 describe 'lima::cluster::stop' do
-  let(:plan) { subject }
-  let(:cluster_name) { 'example' }
+  let(:plan) { 'lima::cluster::stop' }
   let(:nodes) do
     [
       'example-main',
@@ -15,8 +14,8 @@ describe 'lima::cluster::stop' do
   end
   let(:clusters) do
     {
-      cluster_name => {
-        'nodes'    => [
+      'example' => {
+        'nodes' => [
           nodes[0],
           nodes[1],
           {
@@ -29,7 +28,7 @@ describe 'lima::cluster::stop' do
       },
     }
   end
-  let(:cluster) { clusters[cluster_name] }
+  let(:cluster_name) { 'example' }
   let(:lima_list_res) do
     {
       'list': [
@@ -39,35 +38,58 @@ describe 'lima::cluster::stop' do
       ]
     }
   end
+  let(:nodes_to_stop) { [nodes[0], nodes[2]] }
+  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters } }
+  let(:force) { false }
 
-  it 'fails when wrong name specified' do
-    result = run_plan(plan, 'name' => 'nonexistent', 'clusters' => clusters)
+  context 'with non-existent cluster' do
+    let(:cluster_name) { 'nonexistent' }
 
-    expect(result.ok?).to be(false)
-    expect(result.value.msg).to match(%r{Cluster 'nonexistent' is not defined})
+    it 'fails' do
+      result = run_plan(plan, plan_params)
+
+      expect(result.ok?).to be(false)
+      expect(result.value.msg).to match(%r{Cluster 'nonexistent' is not defined})
+    end
   end
 
-  it 'stops all non-running nodes in the cluster' do
-    expect_plan('lima::clusters').always_return(cluster)
-    expect_task('lima::list').be_called_times(1).always_return(lima_list_res)
-
-    nodes_to_stop = [
-      nodes[0],
-      nodes[2],
-    ]
-    nodes_to_stop.each do |node|
-      expect_task('lima::stop').be_called_times(1).with_params('name' => node).always_return(stop: true)
+  context 'with existing cluster' do
+    before :each do
+      expect_plan('lima::clusters').always_return(clusters[cluster_name])
+      expect_task('lima::list').be_called_times(1).always_return(lima_list_res)
+      nodes_to_stop.each do |node|
+        expect_task('lima::stop').be_called_times(1).with_params('name' => node, 'force' => force).always_return(stop: true)
+      end
+      expect_out_verbose.with_params("Defined nodes: [#{nodes.join(', ')}]")
+      expect_out_verbose.with_params("Nodes to stop: [#{nodes_to_stop.join(', ')}]")
     end
 
-    expect_out_verbose.with_params("Defined nodes: [#{nodes.join(', ')}]")
-    expect_out_verbose.with_params("Nodes to stop: [#{nodes_to_stop.join(', ')}]")
+    context 'with force unset' do
+      it 'stops all non-running nodes in the cluster' do
+        result = run_plan(plan, plan_params)
 
-    result = run_plan(plan, 'name' => cluster_name, 'clusters' => clusters)
+        expect(result.ok?).to be(true)
+        expect(result.value.count).to eq(nodes_to_stop.length)
+        result.value.each do |r|
+          expect(r.first.value).to eq('stop' => true)
+        end
+      end
+    end
 
-    expect(result.ok?).to be(true)
-    expect(result.value.count).to eq(nodes_to_stop.length)
-    result.value.each do |r|
-      expect(r.first.value).to eq('stop' => true)
+    context 'with force => true' do
+      let(:force) { true }
+      let(:plan_params) { super().merge('force' => force) }
+      let(:nodes_to_stop) { [nodes[0], nodes[1], nodes[2]] }
+
+      it 'stops all non-running nodes in the cluster' do
+        result = run_plan(plan, plan_params)
+
+        expect(result.ok?).to be(true)
+        expect(result.value.count).to eq(nodes_to_stop.length)
+        result.value.each do |r|
+          expect(r.first.value).to eq('stop' => true)
+        end
+      end
     end
   end
 end

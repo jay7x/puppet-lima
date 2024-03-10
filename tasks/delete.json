@@ -19,6 +19,11 @@
     "names": {
       "description": "VM names to delete",
       "type": "Optional[Array[String[1]]]"
+    },
+    "force": {
+      "description": "Forcibly kill the processes",
+      "type": "Boolean",
+      "default": false
     }
   }
 }

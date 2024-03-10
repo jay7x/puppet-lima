@@ -12,9 +12,10 @@ class LimaStopTask < TaskHelper
 
   def stop(opts = {})
     @cli_helper ||= opts.delete(:cli_helper) || Lima::CliHelper.new(opts)
+    @force = opts.delete(:force) || false
     @name = opts.delete(:name)
 
-    { stop: @cli_helper.stop(@name) }
+    { stop: @cli_helper.stop(@name, @force) }
   end
 end
 

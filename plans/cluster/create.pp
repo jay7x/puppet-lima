@@ -10,7 +10,7 @@ plan lima::cluster::create (
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
 ) {
-  $cluster = run_plan('lima::clusters', 'name' => $name, 'clusters' => $clusters)
+  $cluster = run_plan('lima::clusters', name => $name, clusters => $clusters)
   $tgt = get_target($target)
 
   $cluster_config = $cluster['nodes'].reduce({}) |$memo, $node| {
@@ -31,7 +31,9 @@ plan lima::cluster::create (
     ].filter |$x| { $x[1] } # Delete undefined options
 
     unless $cfg.length >= 1 {
-      fail("Node ${n['name']} has no config/url defined in the cluster configuration")
+      fail_plan("Node ${n['name']} has no config/url defined in the cluster configuration", 'lima/misconfigured-node', {
+          misconfigured_node => $n['name'],
+      })
     }
 
     # Use first defined option ($cfg[0])
@@ -55,13 +57,11 @@ plan lima::cluster::create (
   # See https://github.com/lima-vm/lima/issues/1354
   # So creating VMs sequentially..
   $create_res = $missing_nodes.map |$node| {
-    run_task(
-      'lima::create',
-      $tgt,
-      'name' => $node,
-      'config' => $cluster_config[$node]['config'],
-      'url' => $cluster_config[$node]['url'],
-    )
+    run_task('lima::create', $tgt, {
+        name   => $node,
+        config => $cluster_config[$node]['config'],
+        url    => $cluster_config[$node]['url'],
+    })
   }
 
   return $create_res
