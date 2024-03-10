@@ -212,26 +212,52 @@ module Lima
     describe '#stop' do
       let(:vm_status) { 'Stopped' }
 
-      it 'stops the VM' do
-        allow(Open3).to receive(:capture3).with('limactl', 'stop', vm_name)
-                                          .and_return(['', '', lima_success])
+      context 'when force unset' do
+        it 'stops the VM' do
+          allow(Open3).to receive(:capture3).with('limactl', 'stop', vm_name)
+                                            .and_return(['', '', lima_success])
 
-        result = lima_helper.stop(vm_name)
-        expect(Open3).to have_received(:capture3).with('limactl', 'stop', vm_name).once
-        expect(result).to be(true)
+          result = lima_helper.stop(vm_name)
+          expect(Open3).to have_received(:capture3).with('limactl', 'stop', vm_name).once
+          expect(result).to be(true)
+        end
+      end
+
+      context 'when force=true' do
+        it 'stops the VM in force mode' do
+          allow(Open3).to receive(:capture3).with('limactl', 'stop', '--force', vm_name)
+                                            .and_return(['', '', lima_success])
+
+          result = lima_helper.stop(vm_name, true)
+          expect(Open3).to have_received(:capture3).with('limactl', 'stop', '--force', vm_name).once
+          expect(result).to be(true)
+        end
       end
     end
 
     describe '#delete' do
       let(:vms) { ['test', 'example'] }
 
-      it 'deletes the VM' do
-        allow(Open3).to receive(:capture3).with('limactl', 'delete', *vms)
-                                          .and_return(['', '', lima_success])
+      context 'when force unset' do
+        it 'deletes the VMs' do
+          allow(Open3).to receive(:capture3).with('limactl', 'delete', *vms)
+                                            .and_return(['', '', lima_success])
 
-        result = lima_helper.delete(vms)
-        expect(Open3).to have_received(:capture3).with('limactl', 'delete', *vms).once
-        expect(result).to be(true)
+          result = lima_helper.delete(vms)
+          expect(Open3).to have_received(:capture3).with('limactl', 'delete', *vms).once
+          expect(result).to be(true)
+        end
+      end
+
+      context 'when force=true' do
+        it 'deletes the VMs in force mode' do
+          allow(Open3).to receive(:capture3).with('limactl', 'delete', '--force', *vms)
+                                            .and_return(['', '', lima_success])
+
+          result = lima_helper.delete(vms, true)
+          expect(Open3).to have_received(:capture3).with('limactl', 'delete', '--force', *vms).once
+          expect(result).to be(true)
+        end
       end
     end
 

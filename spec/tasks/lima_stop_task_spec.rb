@@ -9,19 +9,32 @@ describe LimaStopTask do
   let(:opts) { { cli_helper: lima_helper } }
   let(:lima_helper) do
     helper = instance_double(Lima::CliHelper)
-    allow(helper).to receive(:info).and_return({ 'version' => '1.2.3' })
+    allow(helper).to receive(:info).and_return('version' => '1.2.3')
     helper
   end
 
   describe '#task' do
     context 'with name specified' do
-      let(:opts) { super().merge({ name: 'test' }) }
+      let(:opts) { super().merge(name: 'test') }
 
-      it 'stops the VM' do
-        allow(lima_helper).to receive(:stop).with(opts[:name]).and_return(true)
+      context 'with force unset' do
+        it 'stops the VM' do
+          allow(lima_helper).to receive(:stop).with(opts[:name], false).and_return(true)
 
-        result = task.task(opts)
-        expect(result).to eq({ stop: true })
+          result = task.task(opts)
+          expect(result).to eq(stop: true)
+        end
+      end
+
+      context 'with force=true' do
+        let(:opts) { super().merge(force: true) }
+
+        it 'stops the VM in force mode' do
+          allow(lima_helper).to receive(:stop).with(opts[:name], opts[:force]).and_return(true)
+
+          result = task.task(opts)
+          expect(result).to eq(stop: true)
+        end
       end
     end
   end

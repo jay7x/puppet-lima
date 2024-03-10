@@ -13,9 +13,10 @@ class LimaDeleteTask < TaskHelper
   def delete(opts = {})
     @cli_helper ||= opts.delete(:cli_helper) || Lima::CliHelper.new(opts)
     @limactl = opts.delete(:limactl_path) || 'limactl'
+    @force = opts.delete(:force) || false
     @names = opts.delete(:names) || [ opts.delete(:name) ].compact
 
-    { delete: @cli_helper.delete(@names) }
+    { delete: @cli_helper.delete(@names, @force) }
   end
 end
 

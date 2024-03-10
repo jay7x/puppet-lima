@@ -1,12 +1,15 @@
 # @summary Stop the cluster of Lima VMs
 # @param name
 #   Cluster name
+# @param force
+#   Forcibly stop the processes
 # @param clusters
 #   Hash of all defined clusters. Populated from Hiera usually.
 # @param target
 #   The host to run the limactl on
 plan lima::cluster::stop (
   String[1] $name,
+  Boolean $force = false,
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
 ) {
@@ -22,11 +25,7 @@ plan lima::cluster::stop (
   out::verbose("Defined nodes: ${defined_nodes}")
 
   $list_res = without_default_logging() || {
-    run_task(
-      'lima::list',
-      $target,
-      'names' => $defined_nodes,
-    )
+    run_task('lima::list', $target, 'names' => $defined_nodes)
   }
   $running_nodes = $list_res.find($target).value['list']
   .filter |$x| { $x['status'] == 'Running' }
@@ -35,11 +34,10 @@ plan lima::cluster::stop (
 
   # Stop running nodes
   $stop_res = parallelize ($running_nodes) |$node| {
-    run_task(
-      'lima::stop',
-      $target,
-      'name' => $node,
-    )
+    run_task('lima::stop', $target, {
+        'name'  => $node,
+        'force' => $force,
+    })
   }
 
   return $stop_res

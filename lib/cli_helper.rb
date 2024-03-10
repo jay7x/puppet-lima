@@ -117,8 +117,10 @@ module Lima
       true
     end
 
-    def stop(vm_name)
-      lima_cmd = [@limactl, 'stop', vm_name]
+    def stop(vm_name, force = false)
+      lima_cmd = [@limactl, 'stop']
+      lima_cmd << '--force' if force
+      lima_cmd << vm_name
       _, stderr_str, status = Open3.capture3(*lima_cmd)
 
       unless status.success?
@@ -129,8 +131,10 @@ module Lima
       true
     end
 
-    def delete(vm_names)
-      lima_cmd = [@limactl, 'delete'] + vm_names
+    def delete(vm_names, force = false)
+      lima_cmd = [@limactl, 'delete']
+      lima_cmd << '--force' if force
+      lima_cmd += vm_names
       _, stderr_str, status = Open3.capture3(*lima_cmd)
 
       unless status.success?

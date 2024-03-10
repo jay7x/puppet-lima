@@ -15,6 +15,11 @@
     "name": {
       "description": "VM name",
       "type": "String[1]"
+    },
+    "force": {
+      "description": "Forcibly kill the processes",
+      "type": "Boolean",
+      "default": false
     }
   }
 }
