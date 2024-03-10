@@ -3,8 +3,7 @@
 require 'spec_helper'
 
 describe 'lima::cluster::create' do
-  let(:plan) { subject }
-  let(:cluster_name) { 'example' }
+  let(:plan) { 'lima::cluster::create' }
   let(:nodes) do
     [
       'example-main',
@@ -16,8 +15,8 @@ describe 'lima::cluster::create' do
   end
   let(:clusters) do
     {
-      cluster_name => {
-        'nodes'    => [
+      'example' => {
+        'nodes' => [
           nodes[0],
           nodes[1],
           {
@@ -37,9 +36,14 @@ describe 'lima::cluster::create' do
           'cluster_config_specified' => true,
         },
       },
+      'misconfigured' => {
+        'nodes' => [
+          nodes[2],
+        ],
+      }
     }
   end
-  let(:cluster) { clusters[cluster_name] }
+  let(:cluster_name) { 'example' }
   let(:lima_list_res) do
     {
       'list': [
@@ -48,44 +52,70 @@ describe 'lima::cluster::create' do
       ]
     }
   end
+  let(:nodes_to_create) { [nodes[2], nodes[3], nodes[4]] }
+  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters } }
 
-  it 'fails when wrong name specified' do
-    result = run_plan(plan, { 'name' => 'nonexistent', 'clusters' => clusters })
+  context 'with non-existent cluster' do
+    let(:cluster_name) { 'nonexistent' }
 
-    expect(result.ok?).to be(false)
-    expect(result.value.msg).to match(%r{Cluster 'nonexistent' is not defined})
+    it 'fails' do
+      result = run_plan(plan, plan_params)
+
+      expect(result.ok?).to be(false)
+      expect(result.value.msg).to match(%r{Cluster 'nonexistent' is not defined})
+    end
   end
 
-  it 'creates the cluster' do
-    expect_plan('lima::clusters').always_return(cluster)
-    expect_task('lima::list').be_called_times(1).always_return(lima_list_res)
+  context 'with misconfigured nodes' do
+    let(:cluster_name) { 'misconfigured' }
 
-    # Mock a call to create missing nodes
-    [
-      cluster['nodes'][2],
-      cluster['nodes'][3],
+    it 'fails' do
+      expect_plan('lima::clusters').always_return(clusters[cluster_name])
+
+      result = run_plan(plan, plan_params)
+
+      expect(result.ok?).to be(false)
+      expect(result.value.kind).to match('lima/misconfigured-node')
+      expect(result.value.msg).to match(%r{Node #{nodes[2]} has no config/url defined})
+    end
+  end
+
+  context 'with existing cluster' do
+    let(:node_params) do
       {
-        'name'   => nodes[4],
-        'config' => {
-          'cluster_config_specified' => true,
-        }
-      },
-    ].each do |node|
-      params = {
-        'name'     => node['name'],
-        'config'   => node['config'],
-        'url'      => node['url'],
+        nodes[2] => clusters[cluster_name]['nodes'][2],
+        nodes[3] => clusters[cluster_name]['nodes'][3],
+        nodes[4] => {
+          'name'   => nodes[4],
+          'config' => {
+            'cluster_config_specified' => true,
+          }
+        },
       }
-
-      expect_task('lima::create').be_called_times(1).with_params(params).always_return(create: true)
     end
 
-    expect_out_verbose.with_params("Defined nodes: [#{nodes.join(', ')}]")
-    expect_out_verbose.with_params("Nodes to create: [#{[ nodes[2], nodes[3], nodes[4] ].join(', ')}]")
+    before :each do
+      expect_plan('lima::clusters').always_return(clusters[cluster_name])
+      expect_task('lima::list').be_called_times(1).always_return(lima_list_res)
+      nodes_to_create.each do |node|
+        np = node_params[node]
+        params = {
+          'name'     => np['name'],
+          'config'   => np['config'],
+          'url'      => np['url'],
+        }
 
-    result = run_plan(plan, 'name' => cluster_name, 'clusters' => clusters)
+        expect_task('lima::create').be_called_times(1).with_params(params).always_return(create: true)
+      end
+      expect_out_verbose.with_params("Defined nodes: [#{nodes.join(', ')}]")
+      expect_out_verbose.with_params("Nodes to create: [#{nodes_to_create.join(', ')}]")
+    end
 
-    expect(result.ok?).to be(true)
-    expect(result.value.count).to eq(3)
+    it 'creates the cluster' do
+      result = run_plan(plan, plan_params)
+
+      expect(result.ok?).to be(true)
+      expect(result.value.count).to eq(3)
+    end
   end
 end

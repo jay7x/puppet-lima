@@ -29,7 +29,6 @@ describe 'lima::cluster::stop' do
     }
   end
   let(:cluster_name) { 'example' }
-  let(:cluster) { clusters[cluster_name] }
   let(:lima_list_res) do
     {
       'list': [
@@ -56,7 +55,7 @@ describe 'lima::cluster::stop' do
 
   context 'with existing cluster' do
     before :each do
-      expect_plan('lima::clusters').always_return(cluster)
+      expect_plan('lima::clusters').always_return(clusters[cluster_name])
       expect_task('lima::list').be_called_times(1).always_return(lima_list_res)
       nodes_to_stop.each do |node|
         expect_task('lima::stop').be_called_times(1).with_params('name' => node, 'force' => force).always_return(stop: true)

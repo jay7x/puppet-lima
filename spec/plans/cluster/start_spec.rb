@@ -4,7 +4,6 @@ require 'spec_helper'
 
 describe 'lima::cluster::start' do
   let(:plan) { 'lima::cluster::start' }
-  let(:cluster_name) { 'example' }
   let(:nodes) do
     [
       'example-main',
@@ -16,8 +15,8 @@ describe 'lima::cluster::start' do
   end
   let(:clusters) do
     {
-      cluster_name => {
-        'nodes'    => [
+      'example' => {
+        'nodes' => [
           nodes[0],
           nodes[1],
           nodes[2],
@@ -31,7 +30,7 @@ describe 'lima::cluster::start' do
       },
     }
   end
-  let(:facts) { { 'processors': { 'count': 1 } } }
+  let(:cluster_name) { 'example' }
   let(:lima_list_res) do
     {
       'list': [
@@ -43,17 +42,22 @@ describe 'lima::cluster::start' do
       ]
     }
   end
+  let(:nodes_to_start) { [nodes[0], nodes[1], nodes[3], nodes[4]] }
+  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters } }
+  let(:facts) { { 'processors': { 'count': 1 } } }
 
-  context 'when wrong cluster name specified' do
+  context 'with non-existent cluster' do
+    let(:cluster_name) { 'nonexistent' }
+
     it 'fails' do
-      result = run_plan(plan, 'name' => 'nonexistent', 'clusters' => clusters)
+      result = run_plan(plan, plan_params)
 
       expect(result.ok?).to be(false)
       expect(result.value.msg).to match(%r{Cluster 'nonexistent' is not defined})
     end
   end
 
-  context 'when some nodes are missing' do
+  context 'with missing nodes' do
     let(:lima_list_res) { { 'list': [] } }
 
     it 'fails' do
@@ -61,29 +65,27 @@ describe 'lima::cluster::start' do
       expect_task('lima::list').be_called_times(1).always_return(lima_list_res)
       expect_out_verbose.with_params("Defined nodes: [#{nodes.join(', ')}]")
 
-      result = run_plan(plan, 'name' => cluster_name, 'clusters' => clusters)
+      result = run_plan(plan, plan_params)
 
       expect(result.ok?).to be(false)
       expect(result.value.msg).to match(%r{Some nodes are missing: \[#{nodes.join(', ')}\]})
     end
   end
 
-  context 'when everything is defined properly' do
-    it 'creates and runs the cluster' do
+  context 'with existing cluster' do
+    before :each do
       allow_task('facts').always_return(facts)
-
       expect_plan('lima::clusters').always_return(clusters[cluster_name])
       expect_task('lima::list').be_called_times(1).always_return(lima_list_res)
-      expect_out_verbose.with_params("Defined nodes: [#{nodes.join(', ')}]")
-
-      # Mock a call to start existing but stopped node (see lima_list_res)
-      nodes_to_start = lima_list_res[:list].filter { |n| n[:status] == 'Stopped' }.map { |n| n[:name] }
       nodes_to_start.each do |node|
         expect_task('lima::start').be_called_times(1).with_params('name' => node).always_return(start: true)
       end
+      expect_out_verbose.with_params("Defined nodes: [#{nodes.join(', ')}]")
       expect_out_verbose.with_params("Nodes to start (1 nodes per batch): [#{nodes_to_start.join(', ')}]")
+    end
 
-      result = run_plan(plan, 'name' => cluster_name, 'clusters' => clusters)
+    it 'starts all stopped nodes in the cluster' do
+      result = run_plan(plan, plan_params)
 
       expect(result.ok?).to be(true)
       expect(result.value.count).to eq(nodes_to_start.length)

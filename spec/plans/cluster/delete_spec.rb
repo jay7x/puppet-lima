@@ -29,7 +29,6 @@ describe 'lima::cluster::delete' do
     }
   end
   let(:cluster_name) { 'example' }
-  let(:cluster) { clusters[cluster_name] }
   let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters } }
   let(:force) { false }
 
@@ -46,7 +45,7 @@ describe 'lima::cluster::delete' do
 
   context 'with existing cluster' do
     before :each do
-      expect_plan('lima::clusters').always_return(cluster)
+      expect_plan('lima::clusters').always_return(clusters[cluster_name])
       expect_task('lima::delete').be_called_times(1).with_params('names' => nodes, 'force' => force).always_return(delete: true)
       expect_out_verbose.with_params("Nodes to delete: [#{nodes.join(', ')}]")
     end
