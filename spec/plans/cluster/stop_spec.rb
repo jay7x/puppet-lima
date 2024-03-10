@@ -39,7 +39,7 @@ describe 'lima::cluster::stop' do
       ]
     }
   end
-  let(:nodes_to_stop) { lima_list_res[:list].filter { |x| x[:status] == 'Running' }.map { |x| x[:name] } }
+  let(:nodes_to_stop) { [nodes[0], nodes[2]] }
   let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters } }
   let(:force) { false }
 
@@ -80,6 +80,7 @@ describe 'lima::cluster::stop' do
     context 'with force => true' do
       let(:force) { true }
       let(:plan_params) { super().merge('force' => force) }
+      let(:nodes_to_stop) { [nodes[0], nodes[1], nodes[2]] }
 
       it 'stops all non-running nodes in the cluster' do
         result = run_plan(plan, plan_params)
