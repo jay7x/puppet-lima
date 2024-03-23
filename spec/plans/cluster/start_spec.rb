@@ -43,7 +43,8 @@ describe 'lima::cluster::start' do
     }
   end
   let(:nodes_to_start) { [nodes[0], nodes[1], nodes[3], nodes[4]] }
-  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters } }
+  let(:jobs) { nil }
+  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters, 'jobs' => jobs } }
   let(:facts) { { 'processors': { 'count': 1 } } }
 
   context 'with non-existent cluster' do
@@ -81,14 +82,32 @@ describe 'lima::cluster::start' do
         expect_task('lima::start').be_called_times(1).with_params('name' => node).always_return(start: true)
       end
       expect_out_verbose.with_params("Defined nodes: [#{nodes.join(', ')}]")
-      expect_out_verbose.with_params("Nodes to start (1 nodes per batch): [#{nodes_to_start.join(', ')}]")
     end
 
-    it 'starts all stopped nodes in the cluster' do
-      result = run_plan(plan, plan_params)
+    context 'with no jobs specified' do
+      it 'starts all stopped nodes in the cluster' do
+        expect_task('facts').be_called_times(1)
+        expect_out_verbose.with_params("Nodes to start (1 nodes per batch): [#{nodes_to_start.join(', ')}]")
 
-      expect(result.ok?).to be(true)
-      expect(result.value.count).to eq(nodes_to_start.length)
+        result = run_plan(plan, plan_params)
+
+        expect(result.ok?).to be(true)
+        expect(result.value.count).to eq(nodes_to_start.length)
+      end
+    end
+
+    context 'with jobs=>2' do
+      let(:jobs) { 2 }
+
+      it 'starts all stopped nodes in the cluster' do
+        expect_task('facts').be_called_times(0)
+        expect_out_verbose.with_params("Nodes to start (#{jobs} nodes per batch): [#{nodes_to_start.join(', ')}]")
+
+        result = run_plan(plan, plan_params)
+
+        expect(result.ok?).to be(true)
+        expect(result.value.count).to eq(nodes_to_start.length / jobs)
+      end
     end
   end
 end
