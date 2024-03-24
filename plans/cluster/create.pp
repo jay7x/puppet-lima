@@ -1,12 +1,18 @@
 # @summary Create the cluster of Lima VMs
 # @param name
 #   Cluster name
+# @param start
+#   Start the cluster after creation
+# @param start_jobs
+#   Amount of jobs to start VMs in parallel when $start is true
 # @param clusters
 #   Hash of all defined clusters. Populated from Hiera usually.
 # @param target
 #   The host to run the limactl on
 plan lima::cluster::create (
   String[1] $name,
+  Boolean $start = false,
+  Integer[0] $start_jobs = 0,
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
 ) {
@@ -66,5 +72,9 @@ plan lima::cluster::create (
     })
   }
 
-  return $create_res
+  if $start {
+    return run_plan('lima::cluster::start', name => $name, jobs => $start_jobs, clusters => $clusters, target => $target)
+  } else {
+    return $create_res
+  }
 }
