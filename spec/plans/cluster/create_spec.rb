@@ -53,7 +53,9 @@ describe 'lima::cluster::create' do
     }
   end
   let(:nodes_to_create) { [nodes[2], nodes[3], nodes[4]] }
-  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters } }
+  let(:start) { nil }
+  let(:start_jobs) { nil }
+  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters, 'start' => start, 'start_jobs' => start_jobs } }
 
   context 'with non-existent cluster' do
     let(:cluster_name) { 'nonexistent' }
@@ -111,11 +113,29 @@ describe 'lima::cluster::create' do
       expect_out_verbose.with_params("Nodes to create: [#{nodes_to_create.join(', ')}]")
     end
 
-    it 'creates the cluster' do
-      result = run_plan(plan, plan_params)
+    context 'with default params' do
+      it 'creates the cluster' do
+        expect_plan('lima::cluster::start').not_be_called
 
-      expect(result.ok?).to be(true)
-      expect(result.value.count).to eq(3)
+        result = run_plan(plan, plan_params)
+
+        expect(result.ok?).to be(true)
+        expect(result.value.count).to eq(3)
+      end
+    end
+
+    context 'with start=>true' do
+      let(:start) { true }
+      let(:start_jobs) { 2 }
+      let(:start_params) { { 'name' => cluster_name, 'clusters' => clusters, 'jobs' => start_jobs, 'target' => 'localhost' } }
+
+      it 'creates and starts the cluster' do
+        expect_plan('lima::cluster::start').be_called_times(1).with_params(start_params)
+
+        result = run_plan(plan, plan_params)
+
+        expect(result.ok?).to be(true)
+      end
     end
   end
 end
