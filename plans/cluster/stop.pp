@@ -1,6 +1,10 @@
 # @summary Stop the cluster of Lima VMs
 # @param name
 #   Cluster name
+# @param start
+#   Start the cluster after stopping it
+# @param start_jobs
+#   Amount of jobs to start VMs in parallel when $restart is true
 # @param force
 #   Forcibly stop the processes
 # @param clusters
@@ -9,6 +13,8 @@
 #   The host to run the limactl on
 plan lima::cluster::stop (
   String[1] $name,
+  Boolean $start = false,
+  Integer[0] $start_jobs = 0,
   Boolean $force = false,
   Optional[Hash] $clusters = undef,
   TargetSpec $target = 'localhost',
@@ -48,5 +54,9 @@ plan lima::cluster::stop (
     })
   }
 
-  return $stop_res
+  if $start {
+    return run_plan('lima::cluster::start', name => $name, jobs => $start_jobs, clusters => $clusters, target => $target)
+  } else {
+    return $stop_res
+  }
 }
