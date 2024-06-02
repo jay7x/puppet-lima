@@ -40,10 +40,7 @@ module Lima
 
     def list(vm_names = [])
       lima_cmd = [@limactl, 'list', '--json'] + vm_names
-      stdout_str, stderr_str, status = Open3.capture3(*lima_cmd)
-      unless status.success?
-        raise LimaError, "`#{lima_cmd.join(' ')}` failed with status #{status.exitstatus}: #{stderr_str}"
-      end
+      stdout_str, _stderr_str, _status = Open3.capture3(*lima_cmd)
 
       stdout_str.split("\n").map { |vm| JSON.parse(vm) }
     end
@@ -51,10 +48,7 @@ module Lima
     # A bit faster `list` variant to check the VM status
     def status(vm_name)
       lima_cmd = [@limactl, 'list', '--format', '{{ .Status }}', vm_name]
-      stdout_str, stderr_str, status = Open3.capture3(*lima_cmd)
-      unless status.success?
-        raise LimaError, "`#{lima_cmd.join(' ')}` failed with status #{status.exitstatus}: #{stderr_str}"
-      end
+      stdout_str, _stderr_str, _status = Open3.capture3(*lima_cmd)
 
       stdout_str.chomp
     end
