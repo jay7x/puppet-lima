@@ -29,8 +29,9 @@ describe 'lima::cluster::delete' do
     }
   end
   let(:cluster_name) { 'example' }
-  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters } }
-  let(:force) { false }
+  let(:force) { nil }
+  let(:stop) { nil }
+  let(:plan_params) { { 'name' => cluster_name, 'clusters' => clusters, 'stop' => stop, 'force' => force } }
 
   context 'with non-existent cluster' do
     let(:cluster_name) { 'nonexistent' }
@@ -46,11 +47,12 @@ describe 'lima::cluster::delete' do
   context 'with existing cluster' do
     before :each do
       expect_plan('lima::clusters').always_return(clusters[cluster_name])
-      expect_task('lima::delete').be_called_times(1).with_params('names' => nodes, 'force' => force).always_return(delete: true)
+      expect_task('lima::delete').be_called_times(1).with_params('names' => nodes, 'force' => force ? true : false).always_return(delete: true)
       expect_out_verbose.with_params("Nodes to delete: [#{nodes.join(', ')}]")
+      expect_plan('lima::cluster::stop').be_called_times(0)
     end
 
-    context 'with force unset' do
+    context 'with default params' do
       it 'deletes all nodes in the cluster' do
         result = run_plan(plan, plan_params)
 
@@ -62,9 +64,22 @@ describe 'lima::cluster::delete' do
 
     context 'with force => true' do
       let(:force) { true }
-      let(:plan_params) { super().merge('force' => force) }
 
       it 'deletes all nodes in the cluster' do
+        result = run_plan(plan, plan_params)
+
+        expect(result.ok?).to be(true)
+        expect(result.value.count).to eq(1)
+        expect(result.value[0].value).to eq('delete' => true)
+      end
+    end
+
+    context 'with stop => true' do
+      let(:stop) { true }
+
+      it 'deletes all nodes in the cluster' do
+        expect_plan('lima::cluster::stop').be_called_times(1)
+
         result = run_plan(plan, plan_params)
 
         expect(result.ok?).to be(true)
